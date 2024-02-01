@@ -77,4 +77,3 @@ for record in address_book:
     if record.birthday:
         print(f"Days to Birthday: {record.days_to_birthday()}")
 
-# Dodaj logikę paginacji i inne potrzebne funkcje zgodnie z wymaganiami.
