@@ -30,18 +30,14 @@ class AddressBook:
 def main():
     address_book = AddressBook()
 
-    # Przykładowe dodanie kontaktów
     address_book.add_contact(Contact("Karol Spiewak", "123456789"))
     address_book.add_contact(Contact("Jan Kowalski", "987654321"))
 
-    # Zapisanie książki adresowej
     address_book.save_address_book("address_book.pkl")
 
-    # Utworzenie nowej książki adresowej i wczytanie z pliku
     new_address_book = AddressBook()
     new_address_book.load_address_book("address_book.pkl")
 
-    # Wyszukiwanie kontaktów
     query = input("Wyszukaj kontakty: ")
     results = new_address_book.search_contacts(query)
     if results:
