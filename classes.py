@@ -1,14 +1,51 @@
+from abc import ABC, abstractmethod
 from collections import UserDict
 import re
 from datetime import datetime
 
-class AddressBook(UserDict):
+class Menu(ABC):
+    @abstractmethod
+    def display_menu(self):
+        pass
+
+    @abstractmethod
+    def process_choice(self, choice):
+        pass
+
+class AddressBook(Menu, UserDict):
     def __init__(self):
+        super().__init__()
         self.contacts = {}
         self.notebook = Notebook()
 
+    def display_menu(self):
+        print("Address Book Menu:")
+        print("1. Add Contact")
+        print("2. Delete Contact")
+        print("3. Search Contact")
+        print("4. Display All Contacts")
+        print("5. Quit")
+
+    def process_choice(self, choice):
+        if choice == '1':
+            name = input("Enter name of the contact: ")
+            self.add_contact(name)
+        elif choice == '2':
+            # Logic to delete contact
+            pass
+        elif choice == '3':
+            # Logic to search contact
+            pass
+        elif choice == '4':
+            # Logic to display all contacts
+            pass
+        elif choice == '5':
+            print("Exiting Address Book.")
+        else:
+            print("Invalid choice. Please enter a number from 1 to 5.")
+
     def add_contact(self, name):
-        return self.contacts.add_note()   
+        return self.contacts.add_note()
 
 class Contact():
     def __init__(self, name, phone=None, address=None, email=None, birthday=None):
@@ -164,59 +201,4 @@ class Notebook(UserDict):
                 str_tags = ''
                 for tag in tags:
                     str_tags += f'{tag}; '
-                finded_notes_data.append(num_of_note)
-                finded_notes += f'|{str(num_of_note):^20}|{str(note):^100}|{str_tags:^32}|\n'
-        
-        finded_notes += "+" + "-" * width + "+"
-        if finded_notes_data == []:
-            return f'Notes not find'
-        else:
-            return finded_notes
-    
-    def edit_note(self, num_of_note):
-        if num_of_note not in str(self.data.keys()):
-            print('Number of note doesn\'t exists')
-            return False
-        else:
-            try:
-                note = input('Enter new note text: ')
-                tags = input("Enter new tags: ")
-                self.data[int(num_of_note)] = [Note(note).internal_value, Tags(tags).internal_value]
-                return True
-            
-            except ValueError as e:
-                print(e)
-                return False
-            
-    def remove_note(self, num_of_note):
-        if num_of_note == 'all':
-            self.data.clear()
-            return True
-    
-        elif num_of_note not in str(self.data.keys()):
-            print('Number of note doesn\'t exists')
-            return False
-        else:
-            self.data.pop(int(num_of_note))
-            return True
-
-    def remove_all_notes(self):
-        self.note = ''
-
-    def change_notebook(self, note):
-        self.note = Notebook(note).value
-    
-class Note(Field):
-    @Field.value.setter
-    def value(self, note):
-        if note == '':
-            raise ValueError("Note must include any characters")
-        self.internal_value = note
-
-class Tags(Field):
-    @Field.value.setter
-    def value(self, tags:str):
-        tags = tags.lower()
-        tags = re.split(r'[^0-9a-z]', tags)
-        tags = set(filter(lambda tag: tag.isalnum(), tags))
-        self.internal_value = tags
+                finded_notes_data.append(num_of_note
