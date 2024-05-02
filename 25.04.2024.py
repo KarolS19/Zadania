@@ -1,47 +1,49 @@
 import aiohttp
 import asyncio
-import sys
+import json
 from datetime import datetime, timedelta
 
-async def fetch_exchange_rates(days_back):
-    async with aiohttp.ClientSession() as session:
-        rates = []
-        for i in range(days_back):
-            date = (datetime.now() - timedelta(days=i)).strftime('%d.%m.%Y')
-            url = f'http://api.nbp.pl/api/exchangerates/tables/A/{date}/?format=json'
-            try:
-                async with session.get(url) as response:
-                    if response.status == 200:
+class NBPApiClient:
+    BASE_URL = "http://api.nbp.pl/api/exchangerates/tables/A/"
+
+    async def fetch_exchange_rates(self, days):
+        exchange_rates = []
+        async with aiohttp.ClientSession() as session:
+            for i in range(days):
+                date = datetime.now() - timedelta(days=i)
+                formatted_date = date.strftime("%Y-%m-%d")
+                url = f"{self.BASE_URL}{formatted_date}"
+                try:
+                    async with session.get(url) as response:
                         data = await response.json()
-                        rates_dict = {'EUR': {}, 'USD': {}}
-                        for rate in data[0]['rates']:
-                            if rate['code'] == 'EUR' or rate['code'] == 'USD':
-                                rates_dict[rate['code']]['sale'] = rate['ask']
-                                rates_dict[rate['code']]['purchase'] = rate['bid']
-                        rates.append({date: rates_dict})
-                    else:
-                        rates.append({date: 'Error fetching data'})
-            except aiohttp.ClientError as e:
-                rates.append({date: f'Error: {str(e)}'})
-    return rates
+                        exchange_rate_data = self.extract_eur_usd_rate(data)
+                        exchange_rates.append({formatted_date: exchange_rate_data})
+                except Exception as e:
+                    print(f"Error fetching data for {formatted_date}: {e}")
+        return exchange_rates
+
+    def extract_eur_usd_rate(self, data):
+        rates = data[0]['rates']
+        eur_data = next((rate for rate in rates if rate['code'] == 'EUR'), None)
+        usd_data = next((rate for rate in rates if rate['code'] == 'USD'), None)
+        if eur_data and usd_data:
+            return {
+                'EUR': {
+                    'sale': eur_data['mid'],
+                    'purchase': eur_data['mid']
+                },
+                'USD': {
+                    'sale': usd_data['mid'],
+                    'purchase': usd_data['mid']
+                }
+            }
+        return None
 
 async def main():
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <days_back>")
-        return
+    days = 10  # number of days to fetch exchange rates for
+    api_client = NBPApiClient()
+    exchange_rates = await api_client.fetch_exchange_rates(days)
+    print(json.dumps(exchange_rates, indent=2))
 
-    try:
-        days_back = int(sys.argv[1])
-    except ValueError:
-        print("Please provide a valid number of days.")
-        return
-
-    if days_back <= 0 or days_back > 10:
-        print("Please provide a number of days between 1 and 10.")
-        return
-
-    rates = await fetch_exchange_rates(days_back)
-    print(rates)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
