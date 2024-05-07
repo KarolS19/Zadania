@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timedelta
 
 class NBPApiClient:
-    BASE_URL = "http://api.nbp.pl/api/exchangerates/tables/A/"
+    BASE_URL = "http://https://api.nbp.pl"
 
     async def fetch_exchange_rates(self, days):
         exchange_rates = []
@@ -40,7 +40,7 @@ class NBPApiClient:
         return None
 
 async def main():
-    days = 10  # number of days to fetch exchange rates for
+    days = 10  
     api_client = NBPApiClient()
     exchange_rates = await api_client.fetch_exchange_rates(days)
     print(json.dumps(exchange_rates, indent=2))
